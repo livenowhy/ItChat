@@ -34,6 +34,7 @@ update_friend               = originInstance.update_friend
 get_contact                 = originInstance.get_contact
 get_friends                 = originInstance.get_friends
 get_chatrooms               = originInstance.get_chatrooms
+get_all_chat_room           = originInstance.get_all_chat_room
 get_mps                     = originInstance.get_mps
 set_alias                   = originInstance.set_alias
 set_pinned                  = originInstance.set_pinned

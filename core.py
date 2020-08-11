@@ -194,6 +194,11 @@ class Core(object):
             it is defined in components/contact.py
         '''
         raise NotImplementedError()
+
+    def get_all_chat_room(self):
+        """ fetch all chatrooms list """
+        raise NotImplementedError()
+
     def get_mps(self, update=False):
         ''' fetch massive platforms list
             for options

@@ -15,6 +15,7 @@ def load_contact(core):
     core.get_contact                 = get_contact
     core.get_friends                 = get_friends
     core.get_chatrooms               = get_chatrooms
+    core.get_all_chat_room           = get_all_chat_room
     core.get_mps                     = get_mps
     core.set_alias                   = set_alias
     core.set_pinned                  = set_pinned
@@ -24,6 +25,7 @@ def load_contact(core):
     core.set_chatroom_name           = set_chatroom_name
     core.delete_member_from_chatroom = delete_member_from_chatroom
     core.add_member_into_chatroom    = add_member_into_chatroom
+    core.do_get_contact              = do_get_contact
 
 def update_chatroom(self, userName, detailedMember=False):
     if not isinstance(userName, list):
@@ -300,6 +302,41 @@ def get_contact(self, update=False):
         update_local_friends(self, otherList)
     return utils.contact_deep_copy(self, chatroomList)
 
+def do_get_contact(self, seq=0):
+    url = '%s/webwxgetcontact?r=%s&seq=%s&skey=%s' % (self.loginInfo['url'],
+        int(time.time()), seq, self.loginInfo['skey'])
+    headers = {
+        'ContentType': 'application/json; charset=UTF-8',
+        'User-Agent' : config.USER_AGENT, }
+    try:
+        r = self.s.get(url, headers=headers)
+    except:
+        logger.info('Failed to fetch contact, that may because of the amount of your chatrooms')
+        for chatroom in self.get_chatrooms():
+            self.update_chatroom(chatroom['UserName'], detailedMember=True)
+        return 0, []
+    j = json.loads(r.content.decode('utf-8', 'replace'))
+    return j.get('Seq', 0), j.get('MemberList')
+
+def get_all_chat_room(self):
+    seq, memberList = 0, []
+    while 1:
+        seq, batchMemberList = self.do_get_contact(seq)
+        memberList.extend(batchMemberList)
+        if seq == 0:
+            break
+    chatroomList = list()
+    for m in memberList:
+        if '@@' in m['UserName']:
+            utils.emoji_formatter(m, 'NickName')
+            temp = {
+                'UserName': m['UserName'],
+                'NickName': m['NickName'],
+            }
+            chatroomList.append(temp)
+    return chatroomList
+
+
 def get_friends(self, update=False):
     if update:
         self.get_contact(update=True)
@@ -310,7 +347,7 @@ def get_chatrooms(self, update=False, contactOnly=False):
         return self.get_contact(update=True)
     else:
         if update:
-            self.get_contact(True)
+            self.get_contact(update=update)
         return utils.contact_deep_copy(self, self.chatroomList)
 
 def get_mps(self, update=False):
