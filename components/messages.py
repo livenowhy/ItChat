@@ -273,7 +273,7 @@ def send_raw_msg(self, msgType, content, toUserName):
             'ClientMsgId': int(time.time() * 1e4),
             },
         'Scene': 0, }
-    headers = {'ContentType': 'application/json; charset=UTF-8', 'User-Agent' : config.USER_AGENT}
+    headers = { 'ContentType': 'application/json; charset=UTF-8', 'User-Agent' : config.USER_AGENT }
     r = self.s.post(url, headers=headers,
         data=json.dumps(data, ensure_ascii=False).encode('utf8'))
     return ReturnValue(rawResponse=r)
